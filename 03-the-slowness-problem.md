@@ -1,4 +1,4 @@
-The Slowness Problem: Identifying RAG Bottlenecks
+# The Slowness Problem: Diagnosing RAG Bottlenecks
 
 In real-life applications, performance issues don't break anything abruptly; they gradually degrade user experience to a level where it is no longer usable. That's why it was challenging to detect any issues with RAG integration until students stopped using it actively.
 
@@ -8,7 +8,7 @@ Measuring Response Time
 
 Before adding RAG, a single-pass GPT-4 system took about 2-3 seconds to provide answers to questions. The new system required 8-12 seconds, which is a noticeable improvement for students expecting a prompt reply. The difference in response time was significant enough to influence their decisions and behavior.
 
-RAG Architecture Bottlenecks
+## Understanding the Bottleneck
 
 The RAG pipeline consists of three primary steps that require some time:
 
