@@ -1,4 +1,4 @@
-Rapid Changes with RAG: Rebuilding the Tutoring Agent in 8 Weeks
+# Moving Fast With RAG: Redesigning the Tutoring Agent in 8 Weeks
 
 Students were too heavily dependent on the tutor's fictional answers, proving that GPT-4 isn't always reliable. And we faced a serious issue that demanded us to redesign the entire architecture of the solution.
 
