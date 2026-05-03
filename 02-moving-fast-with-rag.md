@@ -1,51 +1,53 @@
 # Moving Fast With RAG: Redesigning the Tutoring Agent in 8 Weeks
 
-Students were too heavily dependent on the tutor's fictional answers, proving that GPT-4 isn't always reliable. And we faced a serious issue that demanded us to redesign the entire architecture of the solution.
+The calculus hallucination had changed everything. We had students trusting answers that sounded right but were factually wrong. We couldn't just patch this. We needed to rebuild.
 
-That is why we chose RAG — Retieval-Augmented Generation.
+That's when RAG became our strategy.
 
-The algorithm is straightforward: don't allow GPT-4 to rely exclusively on its training. Provide the model with the necessary source material (give it to read relevant parts of textbooks and produce an answer based on that). The idea was to reduce the number of hallucinations as much as possible.
+Retrieval-Augmented Generation. The idea is elegant: instead of asking GPT-4 to generate from what it knows, give it the actual source material first. Let it read the textbook, then answer the question. Make every response grounded in something real.
 
-That sounds pretty promising. We had only 8 weeks to create a prototype.
+We had eight weeks to make it work.
 
-What is RAG and Why Does It Suit Our Purpose Well?
+## What RAG Actually Is (And Why It's Perfect for Tutoring)
 
-Here is the process description and an explanation of why RAG suits our purposes perfectly.
+Here's the difference between how traditional LLMs work and how RAG works.
 
-While pure generator architectures such as GPT-4 have only generation in their pipeline, RAG consists of two stages. At the first step, a student asks the agent a question. In order to answer it, the AI is provided with the sources to the questions (relevant textbook passages). That is, the algorithm is aimed at minimizing hallucinations.
+A standard LLM like GPT-4 generates answers from its training data. You ask a question, it generates the most probable tokens. Everything comes from what it's learned. For specific curricula, newer information, or anything niche, that's just not there. Or worse—the training data has wrong information, and GPT-4 confidently makes something up.
 
-The next step is obvious: GPT-4 produces an answer basing on all the provided materials. If GPT-4 cannot find the answer, it tells us so.
+RAG flips this. Two steps:
 
-In an educational environment, the benefits of RAG are obvious: students receive answers with citations. A simple click on the source allows the user to go directly to the related passage, thus ensuring that there are almost no hallucinations since the answer comes from the book.
+**Step 1: Retrieval.** Student asks a question. Before we send it to GPT-4, we search a vector database for the most relevant curriculum materials. We find the textbook sections, lesson notes, problem sets—anything relevant. We hand the AI a pile of actual source material.
 
-Why Chroma and Multitenant Isolation?
+**Step 2: Generation.** GPT-4 now generates an answer, but it's anchored. It has context. It's reading from the actual curriculum. If the answer isn't in the materials, the model knows to say so instead of making something up.
 
-We needed a fast and scalable vector database that would provide multitenancy isolation.
+The payoff for education is huge. Students get source-cited answers. They can click through to the exact textbook section. And hallucinations become much, much harder—you can't confidently invent a formula when you're reading from a calculus textbook.
 
-And so, we choose Chroma.
+## Why Chroma, And How We Built Multi-Tenant Isolation
 
-Our choice wasn't based on the availability of fancy tools. With Chroma, we got exactly what we needed — several isolated curriculum stores in the vector database. Our goal was to store curriculum material of numerous schools in one vector database and support requests with tenant ID metadata for isolating data per tenant.
+We needed a vector database. Something fast, something that could scale, and most importantly: something that could keep data from different schools completely separate.
 
-Here is how we made it work. When a student logged in, their tenant ID (their school) was attached automatically. When making requests, the system searched for the relevant documents using the metadata: tenant ID = their_school_id. Thus, the results belonged only to the particular curriculum material of one specific tenant.
+We went with Chroma.
 
-So, we could easily store thousands of documents from many schools in one database. We scaled from one student to five thousand in no time and with no extra efforts using only one Chroma instance. And all that stayed isolated.
+Not because it was the fanciest option, but because of one feature: tenant_id filtering. One database, multiple isolated curriculum stores. Each school's data lives in the same Chroma instance, but when a student from School A asks a question, they only get results from School A's curriculum. The isolation happens at the database level—it's built in, not jury-rigged.
 
-Creating this pipeline was a challenge. We had to work with vector embeddings, filter the content based on metadata and ensure isolation under the high load — lots of debugging had to be done. Nevertheless, in mid-July everything finally started working. We embed documents with tenant ID metadata and retrieve the best matches for each request.
+Here's how it actually works: when a student logs in, their tenant_id (their school) gets attached to their request. When they ask a question, we search with a filter: `tenant_id == their_school_id`. Only their curriculum comes back. That meant we could serve 5,000+ students across different schools without managing separate databases for each one. One database. Complete isolation. Clean.
 
-Shipping v1: One Step Further
+Getting this working took longer than we expected. Vector embeddings, metadata filtering, making sure the isolation held under load—there were nights of debugging that blurred together. But by late July, we had it. We could embed curriculum documents, tag them with tenant metadata, and retrieve only the right stuff for each student.
 
-This was a milestone release.
+## Shipping v1: The Moment of Truth
 
-For the first time, students received answers with citations. It allowed users to click the links and directly open the textbook sections that contained answers to their questions. While some hallucinations still appeared in our application, their number decreased dramatically. Hallucinations occurred rarely and were always grounded on some real material.
+When we deployed the first version, something shifted. The system returned source-cited responses. Students could see exactly which textbook section the answer came from. Hallucinations didn't disappear—LLMs are still LLMs—but they became rare. And when they happened, they were grounded in actual source material, which made them more detectable.
 
-Releasing a system to thousands of active users, allowing students to get answers with citations and storing their curriculum materials in one vector database was a huge step for us as a team. Product development came to the end.
+We shipped to the same 5,000+ students. This time, serving source-grounded answers across isolated curricula. Every response had citations. It felt like a real product.
 
-Metrics proved that the quality of answers improved compared to the previous version. The fact was supported by the increased number of clicks on citation links, which proves the increased user trust towards the system. The improvement was noted even by educators who made their comments. This was the first time that the solution got credibility.
+The metrics looked good. Response quality went up. Students were clicking through to source materials, which meant they actually trusted the answers enough to verify them. Teachers started noticing the difference. For the first time, the system felt trustworthy.
 
-Unfortunately, there was one serious problem.
+Then we hit something we didn't expect.
 
-The system became noticeably slower. Speeding down the application, we exchanged that for quality. While the speed remained acceptable, we should make some improvements in order to increase it.
+The system was working, but it was slow. Not broken-slow, but noticeably slow. Students were waiting longer for answers. The RAG pipeline—embedding the question, searching the vector store, generating the response—was taking too long. What we'd gained in accuracy, we'd lost in speed.
 
-Unexpectedly tough trade-off.
+We hadn't expected that tradeoff to cut so deep.
 
-To be continued...
+---
+
+**Next: We dug into the slowness. Here's what we found, and what it taught us about RAG systems.**
