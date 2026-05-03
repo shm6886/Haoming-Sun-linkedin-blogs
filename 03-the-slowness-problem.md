@@ -1,55 +1,51 @@
-# The Slowness Problem: Diagnosing RAG Bottlenecks
+The Slowness Problem: Identifying RAG Bottlenecks
 
-Performance issues are insidious in production systems. They don't break things — they just make them worse, gradually, until users stop using them.
+In real-life applications, performance issues don't break anything abruptly; they gradually degrade user experience to a level where it is no longer usable. That's why it was challenging to detect any issues with RAG integration until students stopped using it actively.
 
-After we shipped RAG, student engagement dropped. Not dramatically. Just... slower. Fewer repeated questions. More students timing out. The system was technically working. Responses were correct. But they were taking too long to arrive.
+The new system became less popular, receiving fewer repeat questions. Also, more students faced timeout errors. While the new system still provided technically correct answers, the response time significantly increased, making the service less efficient.
 
-We measured it. The original single-pass GPT-4 system responded in about 2-3 seconds. The RAG system was taking 8-12 seconds. For a student waiting for a homework answer, that's the difference between "this is useful" and "forget it, I'll Google it instead."
+Measuring Response Time
 
-## Understanding the Bottleneck
+Before adding RAG, a single-pass GPT-4 system took about 2-3 seconds to provide answers to questions. The new system required 8-12 seconds, which is a noticeable improvement for students expecting a prompt reply. The difference in response time was significant enough to influence their decisions and behavior.
 
-The RAG pipeline has three main steps. Each one takes time:
+RAG Architecture Bottlenecks
 
-1. **Embedding the question.** We convert the student's question into a vector — a numerical representation of its meaning. This embedding gets sent to the vector database.
+The RAG pipeline consists of three primary steps that require some time:
 
-2. **Retrieving relevant materials.** Chroma searches for the most similar vectors in the curriculum database and returns the top results. This is usually fast, but depends on database size and query load.
+- Question embedding. The system converts students' queries into vectors and sends them to the vector database.
 
-3. **Generating the response.** GPT-4 reads the retrieved materials and generates an answer. This is where most of the latency lives.
+- Materials retrieval. The Chroma model searches through the curriculum dataset and returns the closest vectors.
 
-We profiled the pipeline and found the culprit: step 3. Generation was taking 6-10 of those 8-12 seconds. The embedding and retrieval combined barely took a second.
+- Response generation. GPT-4 uses the retrieved materials and creates an appropriate response.
 
-This made sense once we understood it. GPT-4 generates tokens one at a time, and when it's reading through retrieved materials to craft a thoughtful response, it's doing a lot of work. It's not just predicting the next word — it's reasoning about what the context means, relating it to the curriculum, structuring an explanation. That takes compute.
+Our analysis demonstrated that step 3 accounts for most of the time taken by the system to generate answers. On average, the question generation step requires 6-10 seconds, and both the previous stages combined take only about one second.
 
-## Why This Mattered More Than We Thought
+It becomes evident after observing the GPT-4's response creation mechanism. To provide relevant responses, the model reads materials and generates tokens sequentially, analyzing their meaning and trying to produce an accurate and insightful answer. The process is time-consuming.
 
-Here's the thing about latency in education: it's not just an annoyance. It changes behavior.
+Why Latency Mattered More Than We Thought
 
-A 2-second response? Students wait. A 12-second response? Students close the tab. They ask their friend instead. They move on to the next problem. The tutoring system stops being their first instinct.
+Unlike in other applications, where latency primarily influences user convenience, it significantly changes user behavior in educational products. In this case, the time difference between two-second and twelve-second responses drastically affects the interaction pattern.
 
-And from our perspective, we were losing data. The students who stuck around and waited for answers were only a subset of the population. The students who gave up? We'd never know what questions they had or what they were struggling with. Our system was optimizing for the patient, not for the learners who needed quick feedback.
+A 2-second reply can make students pause for a couple of minutes and wait for an answer. However, if the response takes 12 seconds, users will likely close the tab and use another tool to solve the problem. As a result, the tutoring service would be a secondary choice.
 
-There was also a cost dimension. We were paying for GPT-4 API calls, and longer generations meant more tokens processed. At scale, that was adding up. The tradeoff between accuracy (retrieved context + careful reasoning) and cost/speed (fast generation) was real.
+From our perspective, the situation was critical for several reasons. First, we were losing access to data since we could only observe students who were patient enough to wait. Those who switched to other methods or abandoned the problem left us without information regarding their difficulties.
 
-## How We Approached the Fix
+Moreover, there were financial considerations. In our case, the system paid per call, and a larger number of tokens resulted in higher fees. Thus, we were forced to make trade-offs between accuracy and latency.
 
-We had a few options, none of them clean.
+Potential Solutions
 
-**Option 1: Use a smaller, faster model.** GPT-4 was doing the heavy lifting, but newer smaller models like Claude 3.5 Haiku were competitive. We could swap it in and see if response times improved. Risk: quality might drop.
+We had four options for improving the pipeline's performance.
 
-**Option 2: Optimize the RAG pipeline.** Use a faster embedding model, limit the amount of context passed to GPT-4, parallelize retrieval with generation. Risk: each optimization has tradeoffs.
+- Option 1: Changing the architecture. We could replace GPT-4 with a smaller and faster model like Claude 3.5 Haiku. The experiment would help determine whether there were any significant improvements, although we would lose some quality.
 
-**Option 3: Accept the tradeoff.** Keep RAG, acknowledge the latency, and find UX workarounds. Maybe show a loading animation, or stream the response token-by-token so it *feels* faster.
+- Option 2: Optimizing RAG. Using another embedding model and limiting the amount of context given to GPT-4 could accelerate the pipeline. Parallel execution of retrieval and generation processes would reduce the time as well. However, each approach had drawbacks.
 
-**Option 4: Hybrid approach.** Simple questions bypass the full RAG pipeline. Complex ones get the full treatment.
+- Option 3: Accepting the trade-off. Instead of changing the architecture, we could accept that RAG with GPT-4 was slow. Then, we should optimize the UX and use some tricks, such as loading animations, to mitigate the effects.
 
-We didn't have time to optimize everything perfectly. We had August left. We couldn't rewrite the whole system.
+- Option 4: Developing a hybrid system. Simple questions would skip the entire pipeline, while complex questions would receive a full response. Nevertheless, we didn't have sufficient time to implement every change and refine our system before August.
 
-What we *could* do was understand the tradeoff deeply enough to make informed decisions going forward. We learned that RAG + GPT-4 was powerful but slow. We learned that for tutoring, latency was a feature problem, not just a performance problem. And we learned that sometimes the right architectural choice comes with costs you have to pay.
+While we couldn't resolve all issues, we managed to identify critical factors influencing our decision-making. In particular, we discovered that RAG and GPT-4 combination was a powerful yet inefficient solution. For tutoring platforms, latency was a design problem, not a performance one. In other words, choosing the best architecture often comes at a price.
 
-The slowness taught us something else too: our measurement was incomplete. We'd been optimizing for accuracy and correctness. We hadn't been optimizing for the actual student experience — which includes the time it takes to get an answer.
+The slowness of our system revealed yet another issue – the lack of data. While we optimized our system's accuracy and correctness, we failed to consider the impact of response time on student performance. It became evident that the system required some improvements.
 
-That realization set us up for the next big question: if RAG was correct but slow, and single-pass GPT-4 was fast but hallucinated, what were we actually optimizing for? What did "good" actually mean?
-
----
-
-**Next: We started examining what students actually needed from their tutor. That's when we realized the problem wasn't just retrieval — it was teaching.**
+As a result, we decided to examine student needs, which brought us to another discovery.
