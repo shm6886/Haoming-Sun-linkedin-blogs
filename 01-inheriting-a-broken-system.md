@@ -1,47 +1,35 @@
-# Inheriting a Broken System: Why Single-Pass GPT-4 Tutoring Agents Hallucinate
+Hallucinations of a Single-Pass AI Tutoring Agent Based on GPT-4: Lessons Learned
 
-It was June 2025, and we had a mandate: build an AI tutoring agent that could answer student questions across multiple school curricula. No existing system. No foundation to build on. Just a blank canvas and a summer to ship something.
+June 2025. We had a project – creating a tutoring AI, which would be able to answer questions of students from multiple educational programs within any school curriculum. We had no ready-made solution to use – we were starting from scratch. The deadline was eight weeks.
 
-The choice was obvious. GPT-4 was the best language model available, and the approach was straightforward — call the API with a student's question, get back an answer. Single-pass. Fast. Done. We built it and deployed it to 5,000+ students across different schools. By all metrics, it was working: response times were quick, the API calls were cheap, and students were getting answers.
+The decision seemed straightforward. Using GPT-4 as our language model, we decided to create an application sending a prompt and receiving the answer via the API. One pass and go. It took us a month to build it and test it. At last, the tutoring AI worked for more than 5,000 students. According to our metrics, everything was okay: fast replies, acceptable API costs, students get the replies to their queries.
 
-Then the bug report came in.
+That's when a bug report came into our inbox and everything changed.
 
-A student had asked about calculus — something about derivatives, the specifics don't matter anymore. GPT-4 generated an answer that sounded authoritative, well-structured, and completely wrong. The formula it invented didn't exist. A student who trusted the system and memorized it would fail their exam. And that's when the problem became visceral: this wasn't a technical failure. It was an educational failure.
+A student asked about calculus with derivatives. I forget the details. What I remember perfectly – the answer of our system. It looked very official and structured; yet, all the formulas it used were nonsense. There was no such formula. Even if a student would try to remember it before the exam, he wouldn't be able to provide a good result. We went from a tech error to a serious educational mistake.
 
-## How Single-Pass GPT-4 Works (and Why It Fails)
+What Is a Single-Pass AI Tutor Based on GPT-4 (And How Does It Fail)?
 
-Let me explain what we built, because understanding the mechanics is the only way to understand why it broke.
+To understand why this happened, let's explore the principle behind the application.
 
-When you send a question to GPT-4, here's what happens: the model ingests your prompt, processes it through layers of neural networks, and generates the most probable next tokens — one token at a time. It's generating based on patterns it learned during training. Nothing more. It's not looking anything up. It's not reasoning from a knowledge base. It's predicting what text should come next based on statistical patterns.
+The prompt of the user enters the pipeline and becomes a text processed by GPT-4 algorithm. The model takes the prompt and produces a reply one word at a time – based on statistical data received from the training process. There's no search in the database. There's no reasoning. The model just uses probability theory to generate the most likely text it can.
 
-This is powerful for a lot of things. Write an email? GPT-4 will nail it. Explain a concept you've seen before? It'll do that too. But here's the thing about education: when you're asking about a specific curriculum — a particular school's textbook, a specific chapter, a formula in a specific format — the model is still just predicting the most probable continuation of your prompt. If the training data contained similar questions, it'll guess well. If not, it'll hallucinate. It'll invent plausible-sounding answers because that's what tokens predict.
+The algorithm does pretty well for a variety of tasks. It may write an email letter, it may explain some concepts, it may produce text in a required format. But this kind of AI application is never perfect for education, because when it comes to a particular topic of a school curriculum, it has to guess what it needs to generate. It does pretty well if there's such a pattern in its training data. Otherwise, it starts generating some random phrases sounding like truth.
 
-It's like asking someone who's read a lot of calculus books to answer a calculus question without being able to look at the books. They might get it right if it's something they remember. They might also confidently invent a formula that sounds right but is completely wrong.
+It is like asking someone who is well-read on some scientific topics to give an answer without books. The person may repeat something he remembers and gets it right. But there's always the risk of him making something up.
 
-## Why Hallucinations Destroy Trust in Education
+Why Hallucinations Are Problematic in Education
 
-Here's what makes this uniquely dangerous in a tutoring context: students trust authority. When you're a high schooler using an AI tutor, you assume the answers are right. You're not fact-checking GPT-4's calculus formulas — you're learning from them. If the system hallucines once, maybe you notice. If it happens twice and you don't catch it? You've learned something false. You've built your mental model on sand.
+It was especially bad in case of our tutoring application, as students would accept the replies coming from the system as correct. There would be nothing fact-checked, and even if the system hallucinated once and the student noticed the mistake, he wouldn't know if the second reply to his question is going to be correct. It would become a problem of product design – not UX.
 
-This isn't just a UX problem. It's a product problem. The entire value proposition of an AI tutor is that it's reliable. A human tutor can hallucinate too, but if you push back, they self-correct. "Wait, that doesn't sound right" — and they reconsider. GPT-4 doesn't do that. It commits to its hallucination. It stands by the invented formula with the same confidence it would stand by a real one.
+By this moment, the bug report made us realize that our tutoring system is unreliable. We couldn't continue to support it, even though everything seemed okay according to our metrics. Students would receive incorrect information on the subjects they were studying. No matter how confident in their abilities they would feel, all their work would be ruined due to errors made by AI. And we couldn't fix that with anything except rewriting our whole algorithm.
 
-By the time that bug report landed, we'd shipped to thousands of students. How many wrong answers had they already memorized? How many would fail an exam because they learned something false? We didn't know. And that uncertainty was the real problem.
+Pivot Point
 
-## The Moment It Clicked
+Looking now on that report and the calculus formula generated, I realize that the moment was crucial for us. We had eight weeks to deliver something – and we did that. But we failed to create a product. We created something which could have been a problem for students.
 
-I remember sitting with the team, looking at that calculus response, and feeling the weight of it. We'd built something fast. We'd shipped something that worked *on the surface*. But we'd shipped something fundamentally broken in a way that mattered more than speed or cost.
+At this moment, we started thinking differently. We still had two months, and while the deadline became irrelevant to us, the goal remained the same – create a tutoring AI, which wouldn't generate any false statements.
 
-This was June. We had July and August left.
+We considered RAG – Retriever-Augmented Generation algorithm, which uses source documents from the real world for generation process. This meant that hallucinations couldn't happen anymore. The answer could be provided by the system in full reliance on the actual facts from textbooks or other sources.
 
-The question wasn't "how do we make single-pass GPT-4 a little better?" It was "how do we fundamentally change the architecture so that hallucinations stop being possible?"
-
-That's when someone mentioned RAG. Retrieval-Augmented Generation. The idea was simple: instead of generating from memory, give the model the actual source material first. Let it ground its answers in real curriculum data. Make hallucinations structurally impossible.
-
-We didn't know if we could pull it off in eight weeks. We didn't know if the architecture would perform well enough for 5,000 concurrent students. We didn't even know if we had the right tools — Chroma, Langsmith, the whole stack was new to us.
-
-But we knew single-pass GPT-4 wasn't the answer.
-
-And in that calculus hallucination, we had the proof.
-
----
-
-**Next: We redesigned the entire system with retrieval-augmented generation. Here's what we learned about shipping fast with RAG.**
+We didn't know whether it was possible to achieve it in eight weeks, and whether the algorithm would cope with over 5,000 concurrent users. Also, we weren't sure whether we had enough skills to use Chroma, Langsmith, and our new technological environment properly. But we knew that a single-pass AI based on GPT-4 was not the solution.
