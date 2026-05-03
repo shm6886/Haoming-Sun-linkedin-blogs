@@ -1,4 +1,4 @@
-Hallucinations of a Single-Pass AI Tutoring Agent Based on GPT-4: Lessons Learned
+# Inheriting a Broken System: Why Single-Pass GPT-4 Tutoring Agents Hallucinate
 
 June 2025. We had a project – creating a tutoring AI, which would be able to answer questions of students from multiple educational programs within any school curriculum. We had no ready-made solution to use – we were starting from scratch. The deadline was eight weeks.
 
