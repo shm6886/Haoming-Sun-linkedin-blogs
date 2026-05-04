@@ -1,6 +1,8 @@
 # Inheriting a Broken System: Why Single-Pass GPT-4 Tutoring Agents Hallucinate
 
-It was June 2025. We had a mandate: build an AI tutoring agent that could answer student questions across multiple school curricula. No existing system. No foundation to work from. Just a blank canvas and eight weeks to make it work.
+This summer, I inherited a broken system. And that one moment of failure became the catalyst for everything that followed.
+
+It was June 2025. I was a college intern at TalkMeUp Inc in Pittsburgh, tasked with helping rebuild the AI tutoring agent. We had a mandate: answer student questions across multiple school curricula. No existing system. No foundation. Just a blank canvas and eight weeks to make it work.
 
 The approach seemed straightforward. GPT-4 was the best model available. Call it with a question, get an answer back. Simple, fast, done. We built it and shipped it to over 5,000 students across different schools. By every metric that mattered—speed, cost, whether students were getting answers—it worked.
 
@@ -9,6 +11,12 @@ Then someone filed a bug report.
 A student had asked about calculus, something about derivatives. The specifics blur now, but the answer stuck with me. GPT-4 had generated something that sounded authoritative, well-structured, and completely wrong. The formula it invented didn't exist. A student who memorized it would fail their exam.
 
 That's when it became real. This wasn't a technical problem anymore. It was an educational one.
+
+I remember sitting with the team looking at that response, feeling the weight of what we'd done. We'd shipped something fast. We'd shipped something that looked like it was working. But we'd shipped something fundamentally broken. And I realized: this is the story I need to tell.
+
+Over the next three months, I went from "how does RAG even work?" to designing retrieval-augmented systems, debugging production bottlenecks, discovering that retrieving correct sources isn't the same as *teaching*, and building evaluation pipelines that caught regressions before they hit students. I worked alongside four other interns who were just as lost and determined as I was.
+
+What I discovered is this: **building AI systems that people actually trust requires understanding where the guardrails need to be, not just how to move fast.** And that lesson starts right here—with understanding why that single GPT-4 hallucination matters so much more than any speed metric ever could.
 
 ## How Single-Pass GPT-4 Works (and Why It Fails)
 
@@ -31,8 +39,6 @@ This isn't just a bad user experience. It's a broken product. The entire value o
 By the time that bug report hit us, we'd already shipped to thousands of students. How many wrong answers had they memorized? How many would fail exams because they'd learned something false? We didn't know. That uncertainty was the real problem.
 
 ## The Moment It Clicked
-
-I remember sitting with the team looking at that calculus response, feeling the weight of what we'd done. We'd shipped something fast. We'd shipped something that looked like it was working. But we'd shipped something fundamentally broken.
 
 This was June. We had July and August.
 
