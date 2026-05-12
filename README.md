@@ -1,2 +1,2 @@
 # Haoming-Sun-linkedin-blogs
-Blogs
+All Blogs
